@@ -38,7 +38,7 @@ def seed_data():
     # link exercises to sessions (if many-to-many)
     session1.add_exercise(squat.id, sets=3, reps=15, weight=0)
     session2.add_exercise(deadlift.id, sets=4, reps=12, weight=60)
-    session1.add_exercise(bench_press, sets=2, reps=5, weight=0)
+    session1.add_exercise(bench_press.id, sets=2, reps=5, weight=0)
 
 if __name__ == "__main__":
     seed_data()
