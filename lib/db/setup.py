@@ -15,7 +15,8 @@ def create_tables():
        CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY,
           name TEXT NOT NULL,
-          email TEXT UNIQUE NOT NULL
+          age INTEGER,
+          weight REAL
         )
     """)
 
@@ -24,7 +25,8 @@ def create_tables():
        CREATE TABLE IF NOT EXISTS exercises (
            id INTEGER PRIMARY KEY,
            name TEXT NOT NULL,
-           muscle_group TEXT NOT NULL
+           muscle_group TEXT NOT NULL,
+           equipment TEXT NOT NULL
         )
     """)
 
@@ -44,6 +46,7 @@ def create_tables():
     CURSOR.execute("""
        CREATE TABLE IF NOT EXISTS session_exercises (
            id INTEGER PRIMARY KEY,
+           name TEXT NOT NULL,
            session_id INTEGER,
            exercise_id INTEGER,
            sets INTEGER,
@@ -55,7 +58,7 @@ def create_tables():
     """)
     
     CONN.commit
-    
+
 # Drop tables if they exist
 def drop_tables():
     CURSOR.execute("DROP TABLE IF EXISTS session_exercises")
