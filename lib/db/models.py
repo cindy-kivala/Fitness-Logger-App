@@ -28,7 +28,7 @@ class User:
             INSERT INTO users (name, age, weight)
             VALUES (?, ?, ?)
         """
-        CURSOR.execute("INSERT INTO users (name) VALUES (?)", (name,))
+        CURSOR.execute("INSERT INTO users (name, age, weight) VALUES (?, ?, ?)", (name,age, weight))
         CONN.commit()
         return cls(name, age, weight, CURSOR.lastrowid)
 
@@ -100,28 +100,3 @@ class Exercise:
                        (name, muscle_group, equipment))
         CONN.commit()
         return cls(name, muscle_group, equipment, CURSOR.lastrowid)
-    
-# class Goal:
-#     def __init__(self, user_id, description, id=None):
-#         self.id = id
-#         self.user_id = user_id
-#         self.description = description
-
-#     @classmethod
-#     def create_table(cls):
-#         CURSOR.execute('''
-#             CREATE TABLE IF NOT EXISTS goals (
-#                 id INTEGER PRIMARY KEY,
-#                 user_id INTEGER,
-#                 description TEXT,
-#                 FOREIGN KEY(user_id) REFERENCES users(id)
-#             )
-#         ''')
-#         CONN.commit()
-
-#     @classmethod
-#     def create(cls, user_id, description):
-#         CURSOR.execute("INSERT INTO goals (user_id, description) VALUES (?, ?)", 
-#                        (user_id, description))
-#         CONN.commit()
-#         return cls(user_id, description, CURSOR.lastrowid)
