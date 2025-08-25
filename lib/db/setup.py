@@ -46,7 +46,6 @@ def create_tables():
     CURSOR.execute("""
        CREATE TABLE IF NOT EXISTS session_exercises (
            id INTEGER PRIMARY KEY,
-           name TEXT NOT NULL,
            session_id INTEGER,
            exercise_id INTEGER,
            sets INTEGER,

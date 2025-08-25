@@ -31,6 +31,37 @@ class User:
         CURSOR.execute("INSERT INTO users (name, age, weight) VALUES (?, ?, ?)", (name,age, weight))
         CONN.commit()
         return cls(name, age, weight, CURSOR.lastrowid)
+    
+    @classmethod
+    def all(cls):
+        CURSOR.execute("SELECT * FROM users")
+        rows = CURSOR.fetchall()
+        return [cls(row[1], row[2], row[3], row[0]) for row in rows]
+    
+    #find by id
+    @classmethod
+    def find_by_id(cls, user_id):
+        CURSOR.execute("SELECT * FROM user WHERE id=?", (user_id,))
+        row = CURSOR.fetchone()
+        if row:
+            return cls(row[1], row[2], row[3], row[0])
+        return None
+    
+    #update
+    def update(self, name=None, age=None, weight=None):
+        self.name = name if name is not None else self.name
+        self.age = age if age is not None else self.age
+        self.weight = weight if weight is not None else self.weight
+        CURSOR.execute(
+            "UPDATE users SET name = ?, age = ?, weight = ? WHERE id = ?",
+            (self.name, self.age, self.weight, self.id)
+        )
+        CONN.commit()
+
+    #delete
+    def delete(self):
+        CURSOR.execute("DELETE FROM users WHERE id = ?", (self.id,))
+        CONN.commit()
 
 class WorkoutSession:
     def __init__(self, user_id, activity, duration, calories, date, id=None):
