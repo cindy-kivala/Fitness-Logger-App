@@ -48,7 +48,7 @@ class WorkoutSesssion:
     
     @classmethod
     def create(cls, user_id, activity, duration, calories):
-        CURSOR.execute("INSERT INTO workout_sessions(user_id, activity, duration, calories) VALUES (?, ?, ?, ?))", 
+        CURSOR.execute("INSERT INTO workoutsessions(user_id, activity, duration, calories) VALUES (?, ?, ?, ?))", 
                        (user_id, activity, duration, calories))
         CONN.commit()
         return cls(user_id, activity, duration,calories, CURSOR.lastrowid)
