@@ -56,7 +56,7 @@ def create_tables():
         )
     """)
     
-    CONN.commit
+    CONN.commit()
 
 # Drop tables if they exist
 def drop_tables():

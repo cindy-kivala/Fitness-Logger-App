@@ -104,6 +104,38 @@ class WorkoutSession:
             VALUES (?, ?, ?, ?, ?)
         """, (self.id, exercise_id, sets, reps, weight))
         CONN.commit()
+
+    @classmethod
+    def all(cls):
+        CURSOR.execute("SELECT * FROM workoutsessions")
+        rows = CURSOR.fetchall()
+        return [cls(row[1], row[2], row[3], row[4], row[5], row[0]) for row in rows]
+     
+    #our "filter"
+    @classmethod
+    def find_by_id(cls, session_id):
+        CURSOR.execute("SELECT * FROM workoutsessions WHERE id = ?", (session_id,))
+        row = CURSOR.fetchone()
+        if row:
+            return cls(row[1], row[2], row[3], row[4], row[5], row[0])
+        return None
+
+    #update
+    def update(self, activity=None, duration=None, calories=None, date=None):
+        #comprehension
+        self.activity = activity if activity is not None else self.activity
+        self.duration = duration if duration is not None else self.duration
+        self.calories = calories if calories is not None else self.calories
+        self.date = date if date is not None else self.date
+        CURSOR.execute(
+            "UPDATE workoutsessions SET activity = ?, duration = ?, calories = ?, date = ? WHERE id = ?",
+            (self.activity, self.duration, self.calories, self.date, self.id)
+        )
+        CONN.commit()
+
+    def delete(self):
+        CURSOR.execute("DELETE FROM workoutsessions WHERE id = ?", (self.id,))
+        CONN.commit()
     
 #CONFRIRM IF WILL KEEP THIS CLASS OR JUST RETAIN CLASS GOAL
 class Exercise:
@@ -131,3 +163,32 @@ class Exercise:
                        (name, muscle_group, equipment))
         CONN.commit()
         return cls(name, muscle_group, equipment, CURSOR.lastrowid)
+    
+    #basic crud
+    @classmethod
+    def all(cls):
+        CURSOR.execute("SELECT * FROM exercises")
+        rows = CURSOR.fetchall()
+        return [cls(row[1], row[2], row[3], row[0]) for row in rows]
+
+    @classmethod
+    def find_by_id(cls, exercise_id):
+        CURSOR.execute("SELECT * FROM exercises WHERE id = ?", (exercise_id,))
+        row = CURSOR.fetchone()
+        if row:
+            return cls(row[1], row[2], row[3], row[0])
+        return None
+
+    def update(self, name=None, muscle_group=None, equipment=None):
+        self.name = name if name is not None else self.name
+        self.muscle_group = muscle_group if muscle_group is not None else self.muscle_group
+        self.equipment = equipment if equipment is not None else self.equipment
+        CURSOR.execute(
+            "UPDATE exercises SET name = ?, muscle_group = ?, equipment = ? WHERE id = ?",
+            (self.name, self.muscle_group, self.equipment, self.id)
+        )
+        CONN.commit()
+
+    def delete(self):
+        CURSOR.execute("DELETE FROM exercises WHERE id = ?", (self.id,))
+        CONN.commit()
