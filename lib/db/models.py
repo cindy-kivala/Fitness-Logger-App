@@ -5,8 +5,11 @@
 
 #SQLALCHEMY ATTEMPT
 from sqlalchemy import Column, Integer, String, text, Float, DateTime, ForeignKey
-from sqlalchemy.orm import relationship
-from lib.db import Base
+from sqlalchemy.orm import declarative_base #relationship
+from sqlalchemy.orm import relationship, Session
+
+Base = declarative_base()
+#from . import Base  # Import Base from the current package
 
 #User model
 class User(Base):
@@ -23,12 +26,31 @@ class User(Base):
     def __repr__(self):
         return f"<User(id={self.id}, name='{self.name}', age={self.age}, weight={self.weight})>"
     
+    @classmethod
+    def create(cls, session:Session, name, age, weight):
+        """Convenience method to create and add a User to the DB."""
+        user = cls(
+            name=name, 
+            age=age, 
+            weight=weight
+        )
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+    
+    @classmethod
+    def all(cls, session: Session):
+        return session.query(cls).all()
+    
 #Exercise model
 class Exercise(Base):
     __tablename__ = "exercises"
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    muscle_group = Column(String)
+    equipment = Column(String)
     description = Column(String)
 
     # Relationship to WorkoutSession through association table
@@ -36,6 +58,24 @@ class Exercise(Base):
 
     def __repr__(self):
         return f"<Exercise(id={self.id}, name='{self.name}')>"
+    
+    @classmethod
+    def create(cls, session:Session, name, description=None, muscle_group=None, equipment=None):
+        exercise = cls(
+            name=name, 
+            description=description, 
+            muscle_group=muscle_group, 
+            equipment=equipment
+        )
+        session.add(exercise)
+        session.commit()
+        session.refresh(exercise)
+        return exercise
+
+    @classmethod
+    def all(cls, session: Session):
+        return session.query(cls).all()
+    
 
 #WorkoutSession Model
 class WorkoutSession(Base):
@@ -44,6 +84,9 @@ class WorkoutSession(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     date = Column(DateTime, server_default=text('CURRENT_TIMESTAMP'))
+    duration = Column(Integer)  # duration in minutes
+    activity = Column(String)
+    calories = Column(Integer)
 
     # Relationship back to User
     user = relationship("User", back_populates="workout_sessions")
@@ -54,6 +97,29 @@ class WorkoutSession(Base):
     def __repr__(self):
         return f"<WorkoutSession(id={self.id}, user_id={self.user_id}, date={self.date})>"
     
+    @classmethod
+    def create(cls, session:Session, user_id, activity, duration,calories, date=None):
+        workout_session = cls(
+            date=date, 
+            duration=duration, 
+            activity=activity, 
+            calories=calories, 
+            user_id=user_id
+        )
+
+        session.add(workout_session)
+        session.commit()
+        session.refresh(workout_session)
+        return workout_session
+    
+    @classmethod
+    def find_by_id(cls, session: Session, session_id):
+        return session.query(cls).filter_by(id=session_id).first()
+
+    @classmethod
+    def all(cls, session: Session):
+        return session.query(cls).all()
+    
 #ASSOCIATION TABLE
 class WorkoutSessionExercise(Base):
     __tablename__ = "workout_session_exercises"
@@ -61,10 +127,30 @@ class WorkoutSessionExercise(Base):
     id = Column(Integer, primary_key=True)
     session_id = Column(Integer, ForeignKey("workout_sessions.id"), nullable=False)
     exercise_id = Column(Integer, ForeignKey("exercises.id"), nullable=False)
+    sets = Column(Integer)
+    reps = Column(Integer)
+    weight = Column(Float)
 
     # Relationships back to WorkoutSession and Exercise
     workout_session = relationship("WorkoutSession", back_populates="exercises")
     exercise = relationship("Exercise", back_populates="workout_sessions")
+
+    def __repr__(self):
+        return f"<WorkoutSessionExercise(id={self.id}, workout_session_id={self.workout_session_id}, exercise_id={self.exercise_id}, sets={self.sets}, reps={self.reps})>"
+
+    @classmethod
+    def add_to_session(cls, session:Session, workout_session_id, exercise_id, sets, reps, weight):
+        wse = cls(
+            session_id=workout_session_id, 
+            exercise_id=exercise_id, 
+            sets=sets, 
+            reps=reps, 
+            weight=weight
+        )
+        session.add(wse)
+        session.commit()
+        session.refresh(wse)
+        return wse
 
 
 

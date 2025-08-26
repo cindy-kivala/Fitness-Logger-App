@@ -1,6 +1,6 @@
 #from lib.db.models import User, Exercise, WorkoutSession
 import sys
-from lib.helpers import User, Exercise, WorkoutSession
+from lib.helpers import User, Exercise, WorkoutSession, WorkoutSessionExercise
 from lib.helpers import add_user, view_users, view_exercises, view_workouts, add_exercise, add_workout
 
 def main_menu():

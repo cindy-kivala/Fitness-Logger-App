@@ -2,6 +2,8 @@
 #our database initialization script
 # 
 import sqlite3
+from lib.db.models import Base
+from lib.db import engine
 #from lib import CONN, CURSOR
 
 CONN = sqlite3.connect('fitness.db')
