@@ -1,4 +1,3 @@
-#from lib.db.models import User, Exercise, WorkoutSession
 import sys
 from lib.db.models import User, Exercise, WorkoutSession, WorkoutSessionExercise
 from lib.helpers import (
