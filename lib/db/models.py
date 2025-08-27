@@ -43,6 +43,25 @@ class User(Base):
     def all(cls, session: Session):
         return session.query(cls).all()
     
+    #update method
+    def update_user(session, user_id, name=None, age=None, weight=None):
+        user = session.query(User).get(user_id)
+        if user:
+           if name: user.name = name
+           if age: user.age = age
+           if weight: user.weight = weight
+           session.commit()
+           print(f"User {user_id} updated!")
+
+    #delete method
+    def delete_user(session, user_id):
+        user = session.query(User).get(user_id)
+        if user:
+           session.delete(user)
+           session.commit()
+           print(f"User {user_id} deleted!")
+
+    
 #Exercise model
 class Exercise(Base):
     __tablename__ = "exercises"

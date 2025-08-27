@@ -1,7 +1,16 @@
+from sqlalchemy.orm import Session
 from lib.db.models import User, Exercise, WorkoutSession, WorkoutSessionExercise
 from lib.db import SessionLocal
 from datetime import datetime
 from lib.db.setup import CONN, CURSOR
+
+Base.metadata.create_all(engine)
+session = Session(engine)
+
+def list_users():
+    users = User.all(session)
+    for u in users:
+        print(u)
 
 def add_user():
     name = input("Enter name: ")
@@ -13,12 +22,30 @@ def add_user():
     session.close()
     print(f"User created: {user.name}, ID: {user.id}")
 
+def update_user():
+    list_users()
+    user_id = int(input("Enter user ID to update: "))
+    name = input("New name (leave blank to skip): ").strip()
+    age = input("New age (leave blank to skip): ").strip()
+    weight = input("New weight (leave blank to skip): ").strip()
+    update_user(session, user_id, 
+                name=name or None, 
+                age=int(age) if age else None, 
+                weight=float(weight) if weight else None)
+    
+def delete_user():
+    list_users()
+    user_id = int(input("Enter user ID to delete: "))
+    delete_user(session, user_id)
+
 def view_users():
     session = SessionLocal()
     users = session.query(User).all()
     for u in users:
         print(f"ID: {u.id}, Name: {u.name}, Age: {u.age}, Weight: {u.weight}")
     session.close()
+
+#EXERCISES
 
 def add_exercise():
     name = input("Enter exercise name: ")
@@ -81,40 +108,6 @@ def add_workout():
         else:
             break
 
-# def add_workout():
-#     view_users()
-#     user_id = int(input("Enter user ID for session: "))
-#     activity = input("Enter activity: ")
-#     duration = int(input("Enter duration (minutes): "))
-#     calories = int(input("Enter calories burned: "))
-#     date = input("Enter date (YYYY-MM-DD): ")
-
-#      # Prompt for date, default to None to use DB's CURRENT_TIMESTAMP
-#     date_input = input("Enter date (YYYY-MM-DD) [leave blank for today]: ").strip()
-    
-#     if date_input:
-#     # Convert string to datetime object
-#        date_obj = datetime.strptime(date_input, "%Y-%m-%d")
-#     else:
-#     # Use None to let DB default to CURRENT_TIMESTAMP
-#        date_obj = None
-
-#     session = SessionLocal()
-#     workout = WorkoutSession.create(session, user_id, activity, duration, calories, date_obj)
-#     print(f"Workout session created with ID: {session.id}")
-
-# #attempt 1 prompt
-#     while True:
-#         add_more = input("Would you like to add an exercise to this workout session? (y/n): ").lower()
-#         if add_more == 'y':
-#             add_exercise_to_session(workout.id)  # pass session.id directly
-#         else:
-#             break
-
-#     session.close()
-#     #print(f"Workout session created with ID: {workout.id}")
-
-
 def view_workouts():
     session = SessionLocal()
     workouts = session.query(WorkoutSession).all()
@@ -124,22 +117,7 @@ def view_workouts():
     session.close()
 
 def add_exercise_to_session(session_id):
-    # close_session = False
-    # if not session:
-    #     session = SessionLocal()
-    #     close_session = True
-
-    # if not session_id:
-    #    view_workouts()
-    #    session_id = int(input("Enter workout session ID: "))
-
-    # workout = session.query(WorkoutSession).filter_by(id=session_id).first()
-    # if not workout:
-    #     print("Session not found.")
-    #     if close_session:
-    #         session.close()
-    #     return
-    
+   
     view_exercises()
     exercise_id = int(input("Enter exercise ID: "))
     sets = int(input("Sets: "))
@@ -147,22 +125,15 @@ def add_exercise_to_session(session_id):
     weight = float(input("Weight: "))
 
     session = SessionLocal()
-    wse = WorkoutSessionExercise.add_to_session(session, session_id, exercise_id, sets, reps, weight)
+    wse = WorkoutSessionExercise.add_to_session(
+        session, 
+        session_id, 
+        exercise_id, 
+        sets, 
+        reps, 
+        weight)
     print(f"Added to session: {wse}")
     session.close()
 
-    #  # Create WorkoutSessionExercise entry
-    # wse = WorkoutSessionExercise(session_id=workout.id, exercise_id=exercise_id)
 
-    # if hasattr(wse, 'sets'):
-    #     wse.sets = sets
-    # if hasattr(wse, 'reps'):
-    #     wse.reps = reps
-    # if hasattr(wse, 'weight'):
-    #     wse.weight = weight
-
-    # session.add(wse)
-    # session.commit()
-    
-    #session.add_exercise(exercise_id, sets, reps, weight)
     print("Yay!!Exercise added to session.")
