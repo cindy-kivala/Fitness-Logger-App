@@ -95,6 +95,25 @@ class Exercise(Base):
     def all(cls, session: Session):
         return session.query(cls).all()
     
+    #update method
+    def update_exercise(session, exercise_id, name=None, description=None, muscle_group=None, equipment=None):
+        ex = session.query(Exercise).get(exercise_id)
+        if ex:
+           if name: ex.name = name
+           if description: ex.description = description
+           if muscle_group: ex.muscle_group = muscle_group
+           if equipment: ex.equipment = equipment
+           session.commit()
+           print(f"Exercise {exercise_id} updated!")
+
+    #delete method BE CAREFUL WITH THIS
+    def delete_exercise(session, exercise_id):
+        ex = session.query(Exercise).get(exercise_id)
+        if ex:
+           session.delete(ex)
+           session.commit()
+           print(f"Exercise {exercise_id} deleted!")
+
 
 #WorkoutSession Model
 class WorkoutSession(Base):
@@ -111,7 +130,11 @@ class WorkoutSession(Base):
     user = relationship("User", back_populates="workout_sessions")
 
     # Relationship to exercises via association table
-    exercises = relationship("WorkoutSessionExercise", back_populates="workout_session")
+    exercises = relationship(
+        "WorkoutSessionExercise", 
+        back_populates="workout_session",
+        cascade= "all, delete-orphan" #cascade delete ensure that deleting a workout session also deletes its related WorkoutSessionExercise entries.
+    )
 
     def __repr__(self):
         return f"<WorkoutSession(id={self.id}, user_id={self.user_id}, date={self.date})>"
@@ -139,8 +162,28 @@ class WorkoutSession(Base):
     def all(cls, session: Session):
         return session.query(cls).all()
     
+    #update method
+    def update_workout(session, session_id, activity=None, duration=None, calories=None, date=None):
+        ws = session.query(WorkoutSession).get(session_id)
+        if ws:
+           if activity: ws.activity = activity
+           if duration: ws.duration = duration
+           if calories: ws.calories = calories
+           if date: ws.date = date
+           session.commit()
+           print(f"Workout session {session_id} updated!")
+
+    #delete method
+    def delete_workout(session, session_id):
+        ws = session.query(WorkoutSession).get(session_id)
+        if ws:
+           session.delete(ws)
+           session.commit()
+           print(f"Workout session {session_id} deleted!")
+
+
 #ASSOCIATION TABLE
-class WorkoutSessionExercise(Base):
+class WorkoutSessionExercise(Base): #backlinking our relaionship
     __tablename__ = "workout_session_exercises"
 
     id = Column(Integer, primary_key=True)
@@ -154,7 +197,7 @@ class WorkoutSessionExercise(Base):
     workout_session = relationship("WorkoutSession", back_populates="exercises")
     exercise = relationship("Exercise", back_populates="workout_sessions")
 
-    def __repr__(self):
+    def __str__(self):
         return f"<WorkoutSessionExercise(id={self.id}, session_id={self.session_id}, exercise_id={self.exercise_id}, sets={self.sets}, reps={self.reps}, weight={self.weight})>"
 
     @classmethod
@@ -170,6 +213,24 @@ class WorkoutSessionExercise(Base):
         session.commit()
         session.refresh(wse)
         return wse
+    
+    def update_session_exercise(session, wse_id, sets=None, reps=None, weight=None):
+        wse = session.query(WorkoutSessionExercise).get(wse_id)
+        if wse:
+           if sets: wse.sets = sets
+           if reps: wse.reps = reps
+           if weight: wse.weight = weight
+           session.commit()
+           print(f"Session exercise {wse_id} updated!")
+
+    def delete_session_exercise(session, wse_id):
+        wse = session.query(WorkoutSessionExercise).get(wse_id)
+        if wse:
+           session.delete(wse)
+           session.commit()
+           print(f"Session exercise {wse_id} removed from workout!")
+
+
 
 
 
