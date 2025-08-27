@@ -1,5 +1,7 @@
 from lib.db.models import User, Exercise, WorkoutSession, WorkoutSessionExercise
 from lib.db import SessionLocal
+from datetime import datetime
+from lib.db.setup import CONN, CURSOR
 
 def add_user():
     name = input("Enter name: ")
@@ -38,27 +40,79 @@ def view_exercises():
     session.close()
 
 def add_workout():
-    view_users()
+    # List all users
+    CURSOR.execute("SELECT id, name, age, weight FROM users")
+    users = CURSOR.fetchall()
+    for u in users:
+        print(f"ID: {u[0]}, Name: {u[1]}, Age: {u[2]}, Weight: {u[3]}")
+
+    # Get user input
     user_id = int(input("Enter user ID for session: "))
     activity = input("Enter activity: ")
     duration = int(input("Enter duration (minutes): "))
     calories = int(input("Enter calories burned: "))
-    date = input("Enter date (YYYY-MM-DD): ")
+    
+    date_input = input("Enter date (YYYY-MM-DD) [leave blank for today]: ")
+    if date_input.strip() == "":
+        date_obj = datetime.today()
+    else:
+        date_obj = datetime.strptime(date_input, "%Y-%m-%d")
+    
+    # Insert into workout_sessions
+    CURSOR.execute(
+        """
+        INSERT INTO workout_sessions (user_id, date, duration, activity, calories)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (user_id, date_obj.strftime("%Y-%m-%d"), duration, activity, calories)
+    )
+    CONN.commit()
+    print("Workout session added successfully!")
 
-    session = SessionLocal()
-    workout = WorkoutSession.create(session, user_id, activity, duration, calories, date)
-    print(f"Workout session created with ID: {session.id}")
+    # Get the ID of the session we just added
+    session_id = CURSOR.lastrowid
+    print(f"Yay!!Workout session added successfully with ID: {session_id}!")
 
-#attempt 1 prompt
+    # Prompt to add exercises to this session
     while True:
         add_more = input("Would you like to add an exercise to this workout session? (y/n): ").lower()
         if add_more == 'y':
-            add_exercise_to_session(workout.id)  # pass session.id directly
+            add_exercise_to_session(session_id)  # Pass session_id to your function
         else:
             break
 
-    session.close()
-    #print(f"Workout session created with ID: {workout.id}")
+# def add_workout():
+#     view_users()
+#     user_id = int(input("Enter user ID for session: "))
+#     activity = input("Enter activity: ")
+#     duration = int(input("Enter duration (minutes): "))
+#     calories = int(input("Enter calories burned: "))
+#     date = input("Enter date (YYYY-MM-DD): ")
+
+#      # Prompt for date, default to None to use DB's CURRENT_TIMESTAMP
+#     date_input = input("Enter date (YYYY-MM-DD) [leave blank for today]: ").strip()
+    
+#     if date_input:
+#     # Convert string to datetime object
+#        date_obj = datetime.strptime(date_input, "%Y-%m-%d")
+#     else:
+#     # Use None to let DB default to CURRENT_TIMESTAMP
+#        date_obj = None
+
+#     session = SessionLocal()
+#     workout = WorkoutSession.create(session, user_id, activity, duration, calories, date_obj)
+#     print(f"Workout session created with ID: {session.id}")
+
+# #attempt 1 prompt
+#     while True:
+#         add_more = input("Would you like to add an exercise to this workout session? (y/n): ").lower()
+#         if add_more == 'y':
+#             add_exercise_to_session(workout.id)  # pass session.id directly
+#         else:
+#             break
+
+#     session.close()
+#     #print(f"Workout session created with ID: {workout.id}")
 
 
 def view_workouts():

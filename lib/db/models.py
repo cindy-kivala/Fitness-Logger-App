@@ -60,12 +60,12 @@ class Exercise(Base):
         return f"<Exercise(id={self.id}, name='{self.name}')>"
     
     @classmethod
-    def create(cls, session:Session, name, description=None, muscle_group=None, equipment=None):
+    def create(cls, session:Session, name, muscle_group=None, equipment=None,  description=None):
         exercise = cls(
             name=name, 
-            description=description, 
             muscle_group=muscle_group, 
-            equipment=equipment
+            equipment=equipment,
+            description=description, 
         )
         session.add(exercise)
         session.commit()
@@ -100,11 +100,11 @@ class WorkoutSession(Base):
     @classmethod
     def create(cls, session:Session, user_id, activity, duration,calories, date=None):
         workout_session = cls(
-            date=date, 
             duration=duration, 
             activity=activity, 
             calories=calories, 
-            user_id=user_id
+            user_id=user_id,
+            date=date
         )
 
         session.add(workout_session)
@@ -136,7 +136,7 @@ class WorkoutSessionExercise(Base):
     exercise = relationship("Exercise", back_populates="workout_sessions")
 
     def __repr__(self):
-        return f"<WorkoutSessionExercise(id={self.id}, workout_session_id={self.workout_session_id}, exercise_id={self.exercise_id}, sets={self.sets}, reps={self.reps})>"
+        return f"<WorkoutSessionExercise(id={self.id}, session_id={self.session_id}, exercise_id={self.exercise_id}, sets={self.sets}, reps={self.reps}, weight={self.weight})>"
 
     @classmethod
     def add_to_session(cls, session:Session, workout_session_id, exercise_id, sets, reps, weight):
